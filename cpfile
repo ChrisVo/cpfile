@@ -76,7 +76,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # Copy file to clipboard using osascript
-osascript -e "set the clipboard to (read (POSIX file \"$file_path\") as «class furl»)" 2>/dev/null
+osascript -e "set the clipboard to (POSIX file \"$file_path\")" 2>/dev/null
 
 if [[ $? -eq 0 ]]; then
     echo "✓ File copied to clipboard: $(basename "$file_path")"

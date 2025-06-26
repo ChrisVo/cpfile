@@ -1,6 +1,8 @@
 # cpfile
 
-A simple command-line tool for macOS that copies files to the clipboard, allowing you to paste them into applications like Finder, email clients, and more.
+🍎 **macOS Only** - A simple command-line tool for macOS that copies files to the clipboard, allowing you to paste them into applications like Finder, email clients, and more.
+
+> ⚠️ **Platform Requirement**: This tool only works on macOS (Mac computers) as it uses Apple's AppleScript technology. It will not work on Windows or Linux.
 
 ## Features
 
@@ -23,13 +25,13 @@ brew install cpfile
 ```bash
 git clone https://github.com/your-username/cpfile.git
 cd cpfile
-make install
+sudo make install
 ```
 
-This will install `cpfile` to `/usr/local/bin/`. You can customize the installation prefix:
+This will install `cpfile` to `/usr/local/bin/` (requires sudo for system directory access). You can customize the installation prefix:
 
 ```bash
-make install PREFIX=/opt/local
+sudo make install PREFIX=/opt/local
 ```
 
 ## Usage
@@ -86,12 +88,15 @@ cpfile file2.txt
 The underlying AppleScript command used is:
 
 ```applescript
-set the clipboard to (read (POSIX file "/absolute/path/to/file") as «class furl»)
+set the clipboard to (POSIX file "/absolute/path/to/file")
 ```
 
 ## Requirements
 
-- **macOS only**: This tool uses macOS-specific AppleScript functionality
+- 🍎 **macOS only**: This tool uses macOS-specific AppleScript functionality
+  - ❌ **Does NOT work on Windows**
+  - ❌ **Does NOT work on Linux**
+  - ✅ **Works on macOS 10.6+ (Snow Leopard and newer)**
 - **Bash**: Uses bash scripting (available on all macOS systems)
 - **realpath**: Uses the `realpath` command (available on macOS 12+, or install via Homebrew)
 
@@ -112,7 +117,7 @@ make test
 ### Uninstalling
 
 ```bash
-make uninstall
+sudo make uninstall
 ```
 
 ## Creating a Homebrew Formula
@@ -125,11 +130,13 @@ To submit this to Homebrew, you'll need to:
 
 ```ruby
 class Cpfile < Formula
-  desc "Copy files to clipboard on macOS"
+  desc "Copy files to clipboard on macOS (macOS only)"
   homepage "https://github.com/your-username/cpfile"
   url "https://github.com/your-username/cpfile/archive/v1.0.0.tar.gz"
   sha256 "your-sha256-hash-here"
   license "MIT"
+
+  depends_on :macos
 
   def install
     bin.install "cpfile"
@@ -165,7 +172,15 @@ If you're on an older macOS version:
 brew install coreutils
 ```
 
-### "Permission denied"
+### "Permission denied" during installation
+
+The installation requires administrator privileges to write to `/usr/local/bin/`:
+
+```bash
+sudo make install
+```
+
+### "Permission denied" when running
 
 Make sure the script is executable:
 
@@ -185,3 +200,14 @@ chmod +x cpfile
 - `osascript` - The underlying AppleScript runner (built into macOS)
 
 `cpfile` fills the gap for copying actual files (not just text) to the clipboard.
+
+## Platform Compatibility
+
+- ✅ **macOS**: Fully supported (macOS 10.6+)
+- ❌ **Windows**: Not supported (uses macOS-specific AppleScript)
+- ❌ **Linux**: Not supported (uses macOS-specific AppleScript)
+
+If you need similar functionality on other platforms, consider:
+
+- **Windows**: Use PowerShell with `Set-Clipboard -Path "file.txt"`
+- **Linux**: Use `xclip` or platform-specific clipboard tools
