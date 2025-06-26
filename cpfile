@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# cpfile - Copy file to clipboard
+# Usage: cpfile <file_path>
+
+VERSION="1.0.0"
+
+show_help() {
+    cat <<EOF
+cpfile - Copy file to clipboard
+
+USAGE:
+    cpfile [OPTIONS] <file_path>
+
+OPTIONS:
+    -h, --help     Show this help message
+    -v, --version  Show version information
+
+EXAMPLES:
+    cpfile image.png
+    cpfile /path/to/document.pdf
+    cpfile ~/Desktop/file.txt
+
+DESCRIPTION:
+    Copies the specified file to the clipboard so it can be pasted into
+    applications that support file pasting (like Finder, email clients, etc.).
+    
+    The file path will be resolved to an absolute path before copying.
+
+EOF
+}
+
+show_version() {
+    echo "cpfile version $VERSION"
+}
+
+# Parse command line arguments
+case "${1:-}" in
+-h | --help)
+    show_help
+    exit 0
+    ;;
+-v | --version)
+    show_version
+    exit 0
+    ;;
+"")
+    echo "Error: No file path provided" >&2
+    echo "Use 'cpfile --help' for usage information" >&2
+    exit 1
+    ;;
+-*)
+    echo "Error: Unknown option '$1'" >&2
+    echo "Use 'cpfile --help' for usage information" >&2
+    exit 1
+    ;;
+esac
+
+# Check if file exists
+if [[ ! -e "$1" ]]; then
+    echo "Error: File '$1' does not exist" >&2
+    exit 1
+fi
+
+# Check if we're on macOS
+if [[ "$(uname)" != "Darwin" ]]; then
+    echo "Error: cpfile only works on macOS" >&2
+    exit 1
+fi
+
+# Get the absolute path and copy to clipboard
+file_path=$(realpath "$1")
+if [[ $? -ne 0 ]]; then
+    echo "Error: Could not resolve path for '$1'" >&2
+    exit 1
+fi
+
+# Copy file to clipboard using osascript
+osascript -e "set the clipboard to (read (POSIX file \"$file_path\") as «class furl»)" 2>/dev/null
+
+if [[ $? -eq 0 ]]; then
+    echo "✓ File copied to clipboard: $(basename "$file_path")"
+else
+    echo "Error: Failed to copy file to clipboard" >&2
+    exit 1
+fi
